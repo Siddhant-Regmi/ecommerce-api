@@ -16,7 +16,7 @@ export class AuthService {
         const user = await this.usersService.create(registerDto);
         const token = await this.jwtService.signAsync({
             user_id: user.id,
-            role_id: user.role_id,
+            role: user.role.name,
         });
         return { token }; 
     }
@@ -33,6 +33,7 @@ export class AuthService {
                     },
                 ],
             },
+            include: { role: { select: { name: true } } }
         });
         if (!user) {
             throw new NotFoundException(`User ${loginDto.username} not found`);
@@ -44,7 +45,7 @@ export class AuthService {
 
         const token = await this.jwtService.signAsync({
             user_id: user.id,
-            role_id: user.role_id,
+            role: user.role.name,
         });
         return { token };
     }

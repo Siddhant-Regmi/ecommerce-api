@@ -26,7 +26,8 @@ export class UsersService {
   
     return this.prismaService.user.create({
       data: rest,
-    });
+      include: { role: { select: { name: true } } },
+    },);
   }
 
   async findAll() {
