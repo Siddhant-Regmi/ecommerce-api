@@ -27,13 +27,11 @@ export class CategoriesController {
     return this.categoriesService.findOne(+id);
   }
 
-  @UseGuards(VendorGuard)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto) {
     return this.categoriesService.update(+id, updateCategoryDto);
   }
 
-  @UseGuards(VendorGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.categoriesService.remove(+id);

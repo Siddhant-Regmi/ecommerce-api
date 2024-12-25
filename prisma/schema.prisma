@@ -28,22 +28,43 @@ model User {
   name       String
   email      String   @unique @db.VarChar(191)
   mobile     String   @unique @db.VarChar(15)
-  address    String?   @db.VarChar(191)
+  address    String?  @db.VarChar(191)
   password   String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  role Role @relation(fields: [role_id], references: [id], onDelete: Cascade)
+  role     Role      @relation(fields: [role_id], references: [id], onDelete: Cascade)
+  products Product[]
 
   @@map("users")
 }
 
 model Category {
-  id Int @id @default(autoincrement())
-  name String @db.VarChar(255)
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(255)
   description String
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  products Product[]
 
   @@map("categories")
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(255)
+  description String
+  price       Float
+  stock       Int
+  category_id Int
+  user_id     Int
+  image_url   String
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  user     User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [category_id], references: [id], onDelete: Cascade)
+
+  @@map("products")
 }
