@@ -94,4 +94,33 @@ export class ProductsService {
       }
     }
   }
+
+  async findProductsByIds(ids: number[]): Promise<{ id: number; price: number }[]> {
+    // Check if the input IDs array is empty
+    if (!ids || ids.length === 0) {
+      throw new Error('No product IDs provided for lookup.');
+    }
+  
+    try {
+      const products = await this.prismaService.product.findMany({
+        where: { id: { in: ids } },
+        select: { id: true, price: true },
+      });
+  
+      // Ensure all IDs were found
+      if (products.length !== ids.length) {
+        throw new NotFoundException(`Some products were not found.`);
+      }
+  
+      return products;
+    } catch (error) {
+      // Rethrow specific errors or throw a generic error
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new Error(`Failed to fetch product details: ${error.message}`);
+    }
+  }
+  
+  
 }
