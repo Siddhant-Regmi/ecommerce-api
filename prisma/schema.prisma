@@ -19,6 +19,11 @@ enum StatusType {
   Delivered
 }
 
+enum PaymentStatus {
+  Pending
+  Paid
+}
+
 model Role {
   id   Int    @id @default(autoincrement())
   name String @unique
@@ -42,6 +47,8 @@ model User {
   role     Role      @relation(fields: [role_id], references: [id], onDelete: Cascade)
   products Product[]
   orders   Order[]
+  carts    Cart[]
+  payments Payment[]
 
   @@map("users")
 }
@@ -70,36 +77,78 @@ model Product {
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
 
-  user     User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  category Category @relation(fields: [category_id], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  category    Category    @relation(fields: [category_id], references: [id], onDelete: Cascade)
   order_items OrderItem[]
+  cart_items  CartItem[]
 
   @@map("products")
 }
 
 model Order {
-  id          Int      @id @default(autoincrement())
-  user_id     Int
-  total_amount Decimal@db.Decimal(10,2)
-  status StatusType @default(Pending)
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
+  id           Int        @id @default(autoincrement())
+  user_id      Int
+  total_amount Decimal    @db.Decimal(10, 2)
+  status       StatusType @default(Pending)
+  created_at   DateTime   @default(now())
+  updated_at   DateTime   @updatedAt
 
-  user     User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
   order_items OrderItem[]
+  payment     Payment[]
 
   @@map("orders")
 }
 
-model OrderItem{
-  order_id Int
+model OrderItem {
+  order_id   Int
   product_id Int
-  quantity Int?
-  price Decimal?@db.Decimal(10,2)
+  quantity   Int?
+  price      Decimal? @db.Decimal(10, 2)
 
-  order Order   @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  order   Order   @relation(fields: [order_id], references: [id], onDelete: Cascade)
   product Product @relation(fields: [product_id], references: [id], onDelete: Cascade)
 
   @@id([order_id, product_id])
   @@map("order_items")
+}
+
+model Cart {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  user       User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  cart_items CartItem[]
+
+  @@map("carts")
+}
+
+model CartItem {
+  cart_id    Int
+  product_id Int
+  quantity   Int?
+  price      Decimal? @db.Decimal(10, 2)
+
+  carts    Cart    @relation(fields: [cart_id], references: [id], onDelete: Cascade)
+  products Product @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  @@id([cart_id, product_id])
+  @@map("cart_items")
+}
+
+model Payment {
+  id             Int           @id @default(autoincrement())
+  user_id Int
+  order_id       Int
+  payment_type   String
+  payment_status PaymentStatus @default(Pending)
+  transaction_id String?
+  amount         Decimal       @db.Decimal(10, 2)
+  created_at     DateTime      @default(now())
+
+  order Order @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  @@map("payments")
 }
