@@ -2,13 +2,13 @@ import { PaymentStatus } from "@prisma/client";
 import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class CreatePaymentDto {
-    @IsNotEmpty()
+    @IsOptional()
     @IsNumber()
     user_id: number;
 
     @IsNotEmpty()
     @IsNumber()
-    order_id : number;
+    cart_id : number;
 
     @IsNotEmpty()
     @IsString()
@@ -23,6 +23,6 @@ export class CreatePaymentDto {
     transaction_id? : string;
 
     @IsNumber()
-    @IsNotEmpty()
+    @IsOptional()
     amount: number;
 }

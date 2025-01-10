@@ -21,6 +21,10 @@ export class CreateOrderDto {
     @IsNumber()
     user_id: number;
 
+    @IsOptional()
+    @IsNumber()
+    payment_id: number;
+
     @IsNumber()
     @IsOptional()
     total_amount: number;

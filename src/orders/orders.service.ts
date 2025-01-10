@@ -16,7 +16,7 @@ export class OrdersService {
   ) {}
 
   async create(createOrderDto: CreateOrderDto) {
-    const { user_id, status, order_items } = createOrderDto;
+    const { user_id, status, order_items, payment_id } = createOrderDto;
 
     // Fetch product prices and calculate total amount
     const enhancedOrderItems =
@@ -24,9 +24,14 @@ export class OrdersService {
     const total_amount = this.calculateTotalAmount(enhancedOrderItems);
 
     return this.prismaService.$transaction(async (tx) => {
-      // Create the order
+      // Create the order with payment_id
       const order = await tx.order.create({
-        data: { user_id, total_amount, status },
+        data: { 
+          ...(user_id && { user_id }), 
+          total_amount, 
+          status, 
+          payment_id, // Added payment_id
+        },
       });
 
       await Promise.all(
@@ -76,13 +81,13 @@ export class OrdersService {
       throw new NotFoundException(`Order with ID ${id} not found.`);
     }
 
-    const { status, order_items } = updateOrderDto;
+    const { status, order_items, payment_id } = updateOrderDto;
 
     return this.prismaService.$transaction(async (tx) => {
-      // Update the order fields
+      // Update the order fields, including payment_id if provided
       const updatedOrder = await tx.order.update({
         where: { id },
-        data: { status },
+        data: { status, ...(payment_id && { payment_id }) }, // Include payment_id if it exists
       });
 
       if (order_items && order_items.length > 0) {
@@ -121,9 +126,8 @@ export class OrdersService {
       );
     }
 
-      await this.prismaService.order.delete({ where: { id } });
-      return { message: 'Order and associated items removed successfully.' };
-    
+    await this.prismaService.order.delete({ where: { id } });
+    return { message: 'Order and associated items removed successfully.' };
   }
 
   // Helper function to calculate the total amount

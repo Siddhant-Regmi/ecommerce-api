@@ -88,15 +88,16 @@ model Product {
 model Order {
   id           Int        @id @default(autoincrement())
   user_id      Int
+  payment_id Int
   total_amount Decimal    @db.Decimal(10, 2)
   status       StatusType @default(Pending)
   created_at   DateTime   @default(now())
   updated_at   DateTime   @updatedAt
 
   user        User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  payment Payment @relation(fields: [payment_id], references: [id], onDelete: Cascade)
   order_items OrderItem[]
-  payment     Payment[]
-
+  
   @@map("orders")
 }
 
@@ -121,6 +122,7 @@ model Cart {
 
   user       User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
   cart_items CartItem[]
+  payment Payment[]
 
   @@map("carts")
 }
@@ -141,14 +143,16 @@ model CartItem {
 model Payment {
   id             Int           @id @default(autoincrement())
   user_id Int
-  order_id       Int
+  cart_id Int
   payment_type   String
   payment_status PaymentStatus @default(Pending)
   transaction_id String?
   amount         Decimal       @db.Decimal(10, 2)
   created_at     DateTime      @default(now())
 
-  order Order @relation(fields: [order_id], references: [id], onDelete: Cascade)
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  cart Cart @relation(fields: [cart_id], references: [id], onDelete: Cascade)
+  order Order[]
+
   @@map("payments")
 }
